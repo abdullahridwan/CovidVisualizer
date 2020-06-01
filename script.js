@@ -87,34 +87,88 @@ const myDoughnutChart = new Chart(donutChart, {
 
 
 
-// In new York, the deaths in three specific days in a bar graph
+
+/* [makeNYObj] is an array of new objects that extract specific information from
+[data]*/
+function makeNYObj(data) {
+  let returnThis = [];
+  let myData = data.map(function (item) {
+
+    if (item.Province === "New York") {
+      let myObj = {
+        "city": item.Province,
+        "cases": item.Deaths,
+        "confirmed": item.Confirmed,
+        "date": item.Date.substring(0, 10)
+      }
+      returnThis.push(myObj);
+    }
+  })
+  console.log(returnThis.length);
+  return returnThis;
+}
+
+/** [NYObjDeathNums] is an array of the number of deaths given an array of NYObjects  */
+function NYObjCasesNum(arr) {
+  let arrCases = [];
+
+  for (let i = 0; i < arr.length; i++) {
+    arrCases.push(arr[i].cases);
+  }
+
+  return arrCases
+
+};
+
+
+function makeCasesBar(NYObjArr) {
+  //making a data object
+  let dataObj = {
+    datasets: [{
+      barPercentage: 0.5,
+      barThickness: 6,
+      maxBarThickness: 8,
+      minBarLength: 2,
+      data: [10, 20, 30, 40, 50, 60, 70]
+      //NYObjCasesNum(NYObjArr)
+    }]
+  };
+
+  //making an options object
+  let optionsObj = {
+    scales: {
+      xAxes: [{
+        gridLines: {
+          offsetGridLines: true
+        }
+      }]
+    }
+  };
+
+  //putting it together
+  let casesNums = document.getElementById("line-graph-3");
+
+  var myBarChart = new Chart(casesNums, {
+    type: 'bar',
+    data: dataObj,
+    options: optionsObj
+  });
+
+};
+
 
 
 const americanStats = "https://api.covid19api.com/live/country/united-states";
 
-
-/* [dataToObj] is the obj that takes specfic values from the [data] where
-[data] is an array */
-function jsonToDataObj(data) {
-  for (let i = 0; i < data.length; i += 1) {
-
-
-    let arrayOfObjs = [];
-
-    if (data[i].Province === "New York") {
-      console.log(data[i].Date);
-      let thisObj = {
-        date: data[i].Date,
-        cases: data[i].Confirmed
-      }
-
-      arrayOfObjs.push(thisObj)
-    }
-    return arrayOfObjs;
-  }
-}
-
 fetch(americanStats)
   .then(Promise.resolve("yay"))
   .then(res => res.json())
-  .then(data => jsonToDataObj(data));
+  .then(data => makeNYObj(data))
+  .then(NYObjArr => NYObjCasesNum(NYObjArr))
+  .then(NYCasesArr => makeCasesBar(NYCasesArr))
+
+
+
+
+
+
