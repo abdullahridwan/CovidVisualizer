@@ -86,6 +86,20 @@ const myDoughnutChart = new Chart(donutChart, {
 
 
 
+/*----------------------------------------------------------------------------*/
+const barGraphTest = document.getElementById("line-graph-4");
+
+let barGraphDataObj = {
+  labels: ["Saniya", "Safwan", "Radhyyah"];
+};
+
+let myLineChart = new Chart(barGraphTest, {
+  type: 'graph',
+  data: barGraphDataObj,
+  options: options
+});
+/*----------------------------------------------------------------------------*/
+
 
 
 /* [makeNYObj] is an array of new objects that extract specific information from
