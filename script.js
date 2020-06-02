@@ -1,4 +1,4 @@
-//Line Graph 1
+//Radar Graph
 const lineCtx = document.getElementById('line-graph-1').getContext('2d');
 
 
@@ -49,7 +49,7 @@ var myRadarChart = new Chart(lineCtx, {
 
 
 
-//Line graph 2
+//Donut Chart
 const donutChart = document.getElementById("line-graph-2");
 
 const donutData = {
@@ -62,8 +62,6 @@ const donutData = {
     hoverBackgroundColor: ['rgba(255, 99, 132, 1)', 'rgba(255, 206, 86, 1)',
       'rgba(54, 162, 235, 1)']
   }],
-
-  // These labels appear in the legend and in the tooltips when hovering different arcs
   labels: [
     'Red',
     'Yellow',
@@ -87,18 +85,14 @@ const myDoughnutChart = new Chart(donutChart, {
 
 
 /*----------------------------------------------------------------------------*/
-const barGraphTest = document.getElementById("line-graph-4");
 
-let barGraphDataObj = {
-  labels: ["Saniya", "Safwan", "Radhyyah"];
-};
+const americanStats = "https://api.covid19api.com/live/country/united-states";
 
-let myLineChart = new Chart(barGraphTest, {
-  type: 'graph',
-  data: barGraphDataObj,
-  options: options
-});
-/*----------------------------------------------------------------------------*/
+fetch(americanStats)
+  .then(Promise.resolve("yay"))
+  .then(res => res.json())
+  .then(data => makeNYObj(data))
+  .then(NYObjArr => makeCasesBar(NYObjArr))
 
 
 
@@ -118,9 +112,55 @@ function makeNYObj(data) {
       returnThis.push(myObj);
     }
   })
-  console.log(returnThis.length);
   return returnThis;
 }
+
+
+/** [makeCasesBar] takes in the array of [NYObjs] and makes a bar graph from it */
+function makeCasesBar(NYObjArr) {
+  console.log(`makeCasesBar- below should be array of NYObjs`);
+  console.log(NYObjArr);
+  //bar Graph
+  var barGraph = document.getElementById('line-graph-4').getContext('2d');
+  var myChart = new Chart(barGraph, {
+    type: 'bar',
+    data: {
+      labels: NYObjDatesNum(NYObjArr),
+      datasets: [{
+        label: '# of Cases in NY',
+        data: NYObjCasesNum(NYObjArr),
+        backgroundColor: backgroundColorCreation(NYObjArr),
+        borderColor: borderColorCreation(NYObjArr),
+        borderWidth: 1,
+        hoverBackgroundColor: "rgba(255, 99, 132, 1)"
+      }]
+    },
+    options: {
+      scales: {
+        yAxes: [{
+          ticks: {
+            beginAtZero: true
+          }
+        }]
+      }
+    }
+  });
+
+};
+
+
+
+function NYObjDatesNum(NYObjArr) {
+  let arrDatesLabel = [];
+
+  for (let i = 0; i < NYObjArr.length; i++) {
+    arrDatesLabel.push(NYObjArr[i].date)
+  }
+  return arrDatesLabel;
+
+};
+
+
 
 /** [NYObjDeathNums] is an array of the number of deaths given an array of NYObjects  */
 function NYObjCasesNum(arr) {
@@ -134,52 +174,40 @@ function NYObjCasesNum(arr) {
 
 };
 
+function NYObjDatesNum(NYObjArr) {
+  //console.log(NYObjArr);
+  let arrCasesLabel = [];
 
-function makeCasesBar(NYObjArr) {
-  //making a data object
-  let dataObj = {
-    datasets: [{
-      barPercentage: 0.5,
-      barThickness: 6,
-      maxBarThickness: 8,
-      minBarLength: 2,
-      data: [10, 20, 30, 40, 50, 60, 70]
-      //NYObjCasesNum(NYObjArr)
-    }]
-  };
+  for (let i = 0; i < NYObjArr.length; i++) {
+    arrCasesLabel.push(NYObjArr[i].date)
+  }
+  return arrCasesLabel;
 
-  //making an options object
-  let optionsObj = {
-    scales: {
-      xAxes: [{
-        gridLines: {
-          offsetGridLines: true
-        }
-      }]
-    }
-  };
+};
 
-  //putting it together
-  let casesNums = document.getElementById("line-graph-3");
+//makes an array of backgroundColors based on the length of [NYObjArr]
+function backgroundColorCreation(NYObjArr) {
+  let backgroundColorsArr = [];
+  for (let i = 0; i < NYObjArr.length; i++) {
+    backgroundColorsArr.push(`rgba(255, 99, 132, 0.2)`);
+  }
+  return backgroundColorsArr;
+};
 
-  var myBarChart = new Chart(casesNums, {
-    type: 'bar',
-    data: dataObj,
-    options: optionsObj
-  });
-
+function borderColorCreation(NYObjArr) {
+  let borderColorsArr = [];
+  for (let i = 0; i < NYObjArr.length; i++) {
+    borderColorsArr.push(`rgba(255, 99, 132, 1)`);
+  }
+  return borderColorsArr;
 };
 
 
 
-const americanStats = "https://api.covid19api.com/live/country/united-states";
 
-fetch(americanStats)
-  .then(Promise.resolve("yay"))
-  .then(res => res.json())
-  .then(data => makeNYObj(data))
-  .then(NYObjArr => NYObjCasesNum(NYObjArr))
-  .then(NYCasesArr => makeCasesBar(NYCasesArr))
+
+
+
 
 
 
