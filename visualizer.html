@@ -45,6 +45,7 @@
           </select>
         </div>
       </div>
+
     </div>
 
     <!--.//PROVINCE-->
@@ -52,10 +53,13 @@
       <div class="col-md-6">
         <div class="form-group">
           <label for="sel1">Select Province</label>
-          <select class="form-control" id="province-obj">
+          <p style="font-size: 12px; color: red;" id="province-warning"></p>
+          <select class="form-control" id="province-obj" onclick="clickedProvince()">
           </select>
         </div>
       </div>
+
+
     </div>
 
 
@@ -65,7 +69,7 @@
       <div class="col-md-6">
         <div class="form-group">
           <label for="sel1">Select What you want to see</label>
-          <select class="form-control" id="want-obj">
+          <select class="form-control" id="want-obj" required>
             <option>Deaths</option>
             <option>Recovered</option>
             <option>Confirmed</option>
@@ -73,11 +77,12 @@
           </select>
         </div>
       </div>
+
     </div>
 
 
     <div class="row justify-content-center">
-      <button class="btn btn-primary" type="submit" id="submitBtn"> Submit form</button>
+      <button class="btn btn-primary" type="submit" id="submitBtn" onclick="clickedSubmit()"> Submit form</button>
     </div>
 
     <!-- "YOU SELECTED"-->
@@ -85,14 +90,20 @@
 
 
 
+
+
+    <div class="row justify-content-center">
+      <div class="chart-container" style="position: relative; height:500px; width:500px">
+        <canvas id="bar-graph" height="400" width="500"></canvas>
+      </div>
+    </div>
+
+
     <section id="footer">
       <nav class="navbar navbar-dark bg-dark">
         <span class="navbar-brand mb-0 h1" style="color: grey; font-size: 13px;">Thanks for Checking it Out!</span>
       </nav>
     </section>
-
-
-
 
 
 

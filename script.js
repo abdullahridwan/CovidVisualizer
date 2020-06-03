@@ -2,7 +2,10 @@ const submitBtn = document.getElementById("submitBtn");
 const countryObj = document.getElementById("country-obj");
 const provinceObj = document.getElementById("province-obj");
 const wantObj = document.getElementById("want-obj");
+const provinceWarning = document.getElementById("province-warning");
+const barGraphCanvas = document.getElementById("bar-graph");
 let CSObjArr = [];
+var myChart;
 
 
 const americanStats = "https://api.covid19api.com/live/country/united-states";
@@ -12,27 +15,18 @@ const getCountryOptionsAndSlugs = "https://api.covid19api.com/summary";
 provinceObj.disabled = true;
 wantObj.disabled = true;
 
-
+//add this to the end
 //addEventListener to Submit-btn in Visualizer.html
 submitBtn.addEventListener("click", () => {
   let countrySelection = countryObj.options[countryObj.selectedIndex].text;
-  console.log(countrySelection);
 });
 
-//main Fetch
+/** 1. GET COUNTRY OPTIONS ===================================================*/
 
-function makeNYObjArr() {
-  fetch(americanStats)
-    .then(Promise.resolve("yay"))
-    .then(res => res.json())
-    .then(data => makeNYObj(data))
-    .then(NYObjArr => console.log(NYObjArr))
-};
-
-
-
-/* [fetchCpuntryOptions] fetches the options for the country */
+/* [fetchCountryOptions] fetches the options for the country */
 function fetchCountryOptions() {
+  countryObj.disabled = true;
+  countryObj.innerHTML = `<option>Loading . . .</option>`;
   fetch(getCountryOptionsAndSlugs)
     .then(res => res.json())
     .then(data => makeCountrySlugObj(data.Countries))
@@ -40,71 +34,6 @@ function fetchCountryOptions() {
     .catch(e => fetchCountryOptions())
 }
 fetchCountryOptions();
-
-function clickedCountry() {
-  //provinceObj.disabled = false;
-  let mySelection = countryObj.options[countryObj.selectedIndex].text;
-  console.log(mySelection);
-  console.log("Below is the global CSObjArr")
-  console.log(CSObjArr);
-  fetchProvinceOptions(mySelection, CSObjArr);
-}
-
-
-function fetchProvinceOptions(countrySelection, CSObjArr) {
-  //where countryOption is the country the person selected
-
-  //get CountrySlug for that Country
-  let countrySlug = findCountrySlug(countrySelection, CSObjArr);
-  console.log(countrySlug);
-  const countrySelectionUrl = `https://api.covid19api.com/live/country/${countrySlug}`;
-
-  fetch(countrySelectionUrl)
-    .then(res => res.json())
-    .then(data => makeProvinceOptions(data))
-    .catch(e => console.log("oops in fetchProvinceOptions"))
-}
-
-function makeProvinceOptions(data) {
-  let provinceOptions = [];
-  for (let i = 0; i < data.length; i++) {
-    if (data[i].Province !== "") {
-      provinceOptions.push(data[i].Province);
-    }
-  }
-
-  //if the length of the options is 0, then there are no provinces
-  if (provinceOptions.length === 0) {
-    provinceObj.innerHTML = `<option>There are no available Provinces</option>`;
-  } else {
-    provinceObj.innerHTML = provinceOptions[0];
-    for (let x = 1; x < provinceOptions.length; x++) {
-      provinceObj.innerHTML += `<option> ${provinceOptions[x]} </option>`;
-    }
-    provinceObj.disabled = false;
-  }
-};
-
-
-function findCountrySlug(countrySelection, CSObjArr) {
-  //console.log("findCountrySlug - countrySelection:  " + countrySelection);
-  for (let i = 0; i < CSObjArr.length; i++) {
-    //console.log(CSObjArr[i].country);
-    //console.log(CSObjArr[i].country === countrySelection);
-    if (CSObjArr[i].country === countrySelection) {
-      return CSObjArr[i].slug;
-    }
-  }
-};
-
-
-function makeCountryOptions(CSObjArr, countryObj) {
-  //console.log(countryObj.innerHTML);
-  for (let i = 0; i < CSObjArr.length; i++) {
-    countryObj.innerHTML += `<option> ${CSObjArr[i].country} </option>`;
-  };
-
-};
 
 
 
@@ -117,13 +46,264 @@ function makeCountrySlugObj(data) {
     };
     CSObjArr.push(CSObj);
   })
-  //console.log("Below is the CSObjArr from makeCountrySlugObj");
-  //console.log(CSObjArr);
-  //console.log(CSObjArr);
   return CSObjArr;
 };
 
 
+
+/** [makeCountryOptions] is the country options for the HTML Form */
+function makeCountryOptions(CSObjArr, countryObj) {
+  countryObj.innerHTML = `<option> ${CSObjArr[0].country} </option>`;
+  for (let i = 1; i < CSObjArr.length; i++) {
+    countryObj.innerHTML += `<option> ${CSObjArr[i].country} </option>`;
+  };
+  countryObj.disabled = false;
+
+};
+
+
+
+/** 2. GET PROVINCE OPTIONS =================================================*/
+function clickedCountry() {
+  provinceObj.disabled = true;
+  provinceObj.innerHTML = `<option>Loading . . .</option>`;
+  provinceWarning.innerHTML = "";
+
+  //make it a skeleton
+
+  let mySelection = countryObj.options[countryObj.selectedIndex].text;
+  fetchProvinceOptions(mySelection, CSObjArr);
+};
+
+function fetchProvinceOptions(countrySelection, CSObjArr) {
+  //where countryOption is the country the person selected
+
+  //get CountrySlug for that Country
+  let countrySlug = findCountrySlug(countrySelection, CSObjArr);
+  const countrySelectionUrl = `https://api.covid19api.com/live/country/${countrySlug}`;
+
+  fetch(countrySelectionUrl)
+    .then(res => res.json())
+    .then(data => makeProvinceOptions(data))
+    .catch(e => provinceWarning.innerHTML = `Please Reload Page`)
+}
+
+
+
+/** [findCountrySlug] finds the slug of the country choosen. */
+function findCountrySlug(countrySelection, CSObjArr) {
+  for (let i = 0; i < CSObjArr.length; i++) {
+    if (CSObjArr[i].country === countrySelection) {
+      return CSObjArr[i].slug;
+    }
+  }
+};
+
+
+
+/** [makeProvinceOptions] makes the HTML Province Options for selectedd Country*/
+function makeProvinceOptions(data) {
+  let provinceOptions = [];
+  for (let i = 0; i < data.length; i++) {
+    if (data[i].Province !== "") {
+      provinceOptions.push(data[i].Province);
+    }
+  }
+
+  //if the length of the options is 0, then there are no provinces
+  if (provinceOptions.length === 0) {
+    provinceObj.innerHTML = `<option>There are no available Provinces</option>`;
+    provinceObj.disabled = false;
+    provinceWarning.innerHTML =
+      `If there are no provinces,then only data for the country and given
+    status will be
+    shown`;
+  } else {
+    provinceObj.innerHTML = provinceOptions[0];
+    for (let x = 1; x < provinceOptions.length; x++) {
+      provinceObj.innerHTML += `<option> ${provinceOptions[x]} </option>`;
+    }
+    provinceObj.disabled = false;
+  }
+};
+
+/** 3. CHOOSE WHAT YOU WANT =================================================*/
+function clickedProvince() {
+  wantObj.disabled = false;
+};
+
+
+
+/** 4. PRESS SUBMIT ==========================================================*/
+function clickedSubmit() {
+  //clear old canvas  
+  const countrySelection = countryObj.options[countryObj.selectedIndex].text;
+  const provinceSelection = provinceObj.options[provinceObj.selectedIndex].text;
+  const wantSelection = wantObj.options[wantObj.selectedIndex].text;
+  const countryAndWantURL = `https://api.covid19api.com/live/country/${countrySelection}/status/${wantSelection}`;
+  fetch(countryAndWantURL)
+    .then(res => res.json())
+    .then(data => makeCasesBar(data, countrySelection, provinceSelection, wantSelection))
+}
+
+
+
+function makeWantDatesArr(data, provinceSelection, wantSelection) {
+  if (provinceSelection === "There are no available Provinces") {
+    return makeWantDatesArrIf(data, wantSelection);
+  }
+  else {
+    return makeWantDatesArrElse(data, provinceSelection, wantSelection);
+  }
+}
+
+function makeWantDatesArrIf(data, wantSelection) {
+  console.log("ata[i].dates makeWDArrIf");
+  let WDArr = [];
+  for (let i = 0; i < data.length; i++) {
+    console.log(data[i].Date);
+
+    let thisObj = {
+      "nums": data[i][`${wantSelection}`],
+      "dates": data[i].Date
+    }
+    WDArr.push(thisObj)
+  }
+  console.log(WDArr)
+  return WDArr;
+}
+
+
+function makeWantDatesArrElse(data, provinceSelection, wantSelection) {
+  let WDArr = [];
+  for (let i = 0; i < data.length; i++) {
+    if (data[i].Province === provinceSelection) {
+      let thisObj = {
+        "nums": data[i][`${wantSelection}`],
+        "dates": data[i].Date
+      }
+      WDArr.push(thisObj)
+    }
+  }
+
+  return WDArr;
+}
+
+function makeDateLabels(WDArr) {
+  let dateLabelsArr = [];
+  for (let i = 0; i < WDArr.length; i++) {
+    console.log(WDArr[i].dates)
+    console.log(dateToLocale(WDArr[i].dates));
+    dateLabelsArr.push(dateToLocale(WDArr[i].dates))
+  }
+  return dateLabelsArr;
+}
+
+function dateToLocale(date) {
+  const monthArr = ["Jan", "Feb", "March", "April", "May", "Jun", "July",
+    "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const dateShort = date.substring(0, 10);
+
+  const thisMonth = monthArr[parseInt(dateShort.substring(5, 7)) - 1];
+  const day = dateShort.substring(8, 10);
+  const year = dateShort.substring(0, 4);
+
+  const returnDate = `${thisMonth} ${day} ${year}`;
+  return returnDate;
+
+}
+
+function makeWantNums(WDArr) {
+  let wantNumsArr = [];
+  for (let i = 0; i < WDArr.length; i++) {
+    wantNumsArr.push(WDArr[i].nums)
+  }
+  return wantNumsArr;
+}
+
+//makes an array of backgroundColors based on the length of [NYObjArr]
+function backgroundColorCreation(WDArr) {
+  let backgroundColorsArr = [];
+  for (let i = 0; i < WDArr.length; i++) {
+    backgroundColorsArr.push(`rgba(255, 99, 132, 0.2)`);
+  }
+  return backgroundColorsArr;
+};
+
+function borderColorCreation(WDArr) {
+  let borderColorsArr = [];
+  for (let i = 0; i < WDArr.length; i++) {
+    borderColorsArr.push(`rgba(255, 99, 132, 1)`);
+  }
+  return borderColorsArr;
+};
+
+function makeCasesBar(data, countrySelection, provinceSelection, wantSelection) {
+
+  let provinceLabel = "";
+  if (provinceSelection === "There are no available Provinces") {
+    provinceLabel = `(Statewide Data)`;
+  } else
+    provinceLabel = `within the ${provinceSelection} selection.`;
+
+  const WDArr = makeWantDatesArr(data, provinceSelection, wantSelection);
+  console.log(WDArr)
+  const dateLabels = makeDateLabels(WDArr); //for "labels"
+  const wantNums = makeWantNums(WDArr); //for "data"
+  const backgroundColorsArr = backgroundColorCreation(WDArr);
+  const borderColorsArr = borderColorCreation(WDArr);
+  //background Color Creation
+  //border Color Creation
+  console.log(dateLabels)
+  console.log(wantNums)
+
+
+  console.log("im here");
+  console.log(myChart);
+  if (myChart !== undefined) {
+    myChart.destroy();
+  }
+
+  //bar Graph
+  barGraph = barGraphCanvas.getContext('2d');
+  myChart = new Chart(barGraph, {
+    type: 'bar',
+    data: {
+      labels: dateLabels,
+      datasets: [{
+        label: `Number of ${wantSelection} in ${countrySelection} ${provinceLabel}`,
+        data: wantNums,
+        backgroundColor: backgroundColorsArr,
+        borderColor: borderColorsArr,
+        borderWidth: 1,
+        hoverBackgroundColor: "rgba(255, 99, 132, 1)"
+      }]
+    },
+    options: {
+      scales: {
+        yAxes: [{
+          ticks: {
+            beginAtZero: true
+          }
+        }]
+      }
+    }
+  });
+  //*/
+
+
+};
+
+
+
+/*
+function makeNYObjArr() {
+  fetch(americanStats)
+    .then(Promise.resolve("yay"))
+    .then(res => res.json())
+    .then(data => makeNYObj(data))
+    .then(NYObjArr => console.log(NYObjArr))
+};
 
 
 //[makeNYObj] array of new objects that extract specific information from [data]
@@ -143,10 +323,7 @@ function makeNYObj(data) {
   })
   return returnThis;
 }
-
-
-
-
+*/
 
 
 
