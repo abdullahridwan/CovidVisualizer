@@ -1,3 +1,159 @@
+const submitBtn = document.getElementById("submitBtn");
+const countryObj = document.getElementById("country-obj");
+const provinceObj = document.getElementById("province-obj");
+const wantObj = document.getElementById("want-obj");
+let CSObjArr = [];
+
+
+const americanStats = "https://api.covid19api.com/live/country/united-states";
+const getCountryOptionsAndSlugs = "https://api.covid19api.com/summary";
+
+
+provinceObj.disabled = true;
+wantObj.disabled = true;
+
+
+//addEventListener to Submit-btn in Visualizer.html
+submitBtn.addEventListener("click", () => {
+  let countrySelection = countryObj.options[countryObj.selectedIndex].text;
+  console.log(countrySelection);
+});
+
+//main Fetch
+
+function makeNYObjArr() {
+  fetch(americanStats)
+    .then(Promise.resolve("yay"))
+    .then(res => res.json())
+    .then(data => makeNYObj(data))
+    .then(NYObjArr => console.log(NYObjArr))
+};
+
+
+
+/* [fetchCpuntryOptions] fetches the options for the country */
+function fetchCountryOptions() {
+  fetch(getCountryOptionsAndSlugs)
+    .then(res => res.json())
+    .then(data => makeCountrySlugObj(data.Countries))
+    .then(CSObjArr => makeCountryOptions(CSObjArr, countryObj))
+    .catch(e => fetchCountryOptions())
+}
+fetchCountryOptions();
+
+function clickedCountry() {
+  //provinceObj.disabled = false;
+  let mySelection = countryObj.options[countryObj.selectedIndex].text;
+  console.log(mySelection);
+  console.log("Below is the global CSObjArr")
+  console.log(CSObjArr);
+  fetchProvinceOptions(mySelection, CSObjArr);
+}
+
+
+function fetchProvinceOptions(countrySelection, CSObjArr) {
+  //where countryOption is the country the person selected
+
+  //get CountrySlug for that Country
+  let countrySlug = findCountrySlug(countrySelection, CSObjArr);
+  console.log(countrySlug);
+  const countrySelectionUrl = `https://api.covid19api.com/live/country/${countrySlug}`;
+
+  fetch(countrySelectionUrl)
+    .then(res => res.json())
+    .then(data => makeProvinceOptions(data))
+    .catch(e => console.log("oops in fetchProvinceOptions"))
+}
+
+function makeProvinceOptions(data) {
+  let provinceOptions = [];
+  for (let i = 0; i < data.length; i++) {
+    if (data[i].Province !== "") {
+      provinceOptions.push(data[i].Province);
+    }
+  }
+
+  //if the length of the options is 0, then there are no provinces
+  if (provinceOptions.length === 0) {
+    provinceObj.innerHTML = `<option>There are no available Provinces</option>`;
+  } else {
+    provinceObj.innerHTML = provinceOptions[0];
+    for (let x = 1; x < provinceOptions.length; x++) {
+      provinceObj.innerHTML += `<option> ${provinceOptions[x]} </option>`;
+    }
+    provinceObj.disabled = false;
+  }
+};
+
+
+function findCountrySlug(countrySelection, CSObjArr) {
+  //console.log("findCountrySlug - countrySelection:  " + countrySelection);
+  for (let i = 0; i < CSObjArr.length; i++) {
+    //console.log(CSObjArr[i].country);
+    //console.log(CSObjArr[i].country === countrySelection);
+    if (CSObjArr[i].country === countrySelection) {
+      return CSObjArr[i].slug;
+    }
+  }
+};
+
+
+function makeCountryOptions(CSObjArr, countryObj) {
+  //console.log(countryObj.innerHTML);
+  for (let i = 0; i < CSObjArr.length; i++) {
+    countryObj.innerHTML += `<option> ${CSObjArr[i].country} </option>`;
+  };
+
+};
+
+
+
+/*[makeCountrySlugObj] takes in the data and returns obj */
+function makeCountrySlugObj(data) {
+  let myData = data.map(function (item) {
+    let CSObj = {
+      "country": item.Country,
+      "slug": item.Slug
+    };
+    CSObjArr.push(CSObj);
+  })
+  //console.log("Below is the CSObjArr from makeCountrySlugObj");
+  //console.log(CSObjArr);
+  //console.log(CSObjArr);
+  return CSObjArr;
+};
+
+
+
+
+//[makeNYObj] array of new objects that extract specific information from [data]
+function makeNYObj(data) {
+  let returnThis = [];
+  let myData = data.map(function (item) {
+
+    if (item.Province === "New York") {
+      let myObj = {
+        "city": item.Province,
+        "cases": item.Deaths,
+        "confirmed": item.Confirmed,
+        "date": item.Date.substring(0, 10)
+      }
+      returnThis.push(myObj);
+    }
+  })
+  return returnThis;
+}
+
+
+
+
+
+
+
+
+/*
+
+
 //Radar Graph
 const lineCtx = document.getElementById('line-graph-1').getContext('2d');
 
@@ -82,22 +238,23 @@ const myDoughnutChart = new Chart(donutChart, {
   options: donutOptions
 });
 
-
+*/
 
 /*----------------------------------------------------------------------------*/
-
+/*
 const americanStats = "https://api.covid19api.com/live/country/united-states";
 
 fetch(americanStats)
   .then(Promise.resolve("yay"))
   .then(res => res.json())
   .then(data => makeNYObj(data))
-  .then(NYObjArr => makeCasesBar(NYObjArr))
+  .then(NYObjArr => console.log(NYObjArr))
+//makeCasesBar(NYObjArr)
 
 
 
 /* [makeNYObj] is an array of new objects that extract specific information from
-[data]*/
+[data]
 function makeNYObj(data) {
   let returnThis = [];
   let myData = data.map(function (item) {
@@ -116,7 +273,7 @@ function makeNYObj(data) {
 }
 
 
-/** [makeCasesBar] takes in the array of [NYObjs] and makes a bar graph from it */
+/** [makeCasesBar] takes in the array of [NYObjs] and makes a bar graph from it
 function makeCasesBar(NYObjArr) {
   console.log(`makeCasesBar- below should be array of NYObjs`);
   console.log(NYObjArr);
@@ -162,7 +319,7 @@ function NYObjDatesNum(NYObjArr) {
 
 
 
-/** [NYObjDeathNums] is an array of the number of deaths given an array of NYObjects  */
+/** [NYObjDeathNums] is an array of the number of deaths given an array of NYObjects
 function NYObjCasesNum(arr) {
   let arrCases = [];
 
@@ -202,15 +359,7 @@ function borderColorCreation(NYObjArr) {
   return borderColorsArr;
 };
 
-
-
-
-
-
-
-
-
-
+*/
 
 
 

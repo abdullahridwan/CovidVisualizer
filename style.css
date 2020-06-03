@@ -8,7 +8,7 @@ html {
 
 
 #line-graph-4{
-  border: 1px solid rgb(192,192,192);
+  /*border: 1px solid rgb(192,192,192);*/
   padding: 10px;
   box-shadow: 5px 5px rgb(220,220,220);
 }
@@ -18,7 +18,7 @@ html {
   padding-left:10%;
   padding-bottom: 20%;
   background-image: linear-gradient(to top right, #C04848, #480048);
-  border:10px solid black;
+  /*border:10px solid black;*/
   
 }
 
@@ -56,4 +56,12 @@ html {
 .img-fluid{
   max-width: 100%;
   max-height: auto;
+}
+
+#footer{
+  margin-top: 10vh;
+}
+
+.form-group{
+  max-width: 100%;
 }
