@@ -16,11 +16,44 @@ html {
 #hero{
   padding-top:20%;
   padding-left:10%;
-  padding-bottom: 10%;
-  background-image: linear-gradient(to top right, #C04848, #480048)
+  padding-bottom: 20%;
+  background-image: linear-gradient(to top right, #C04848, #480048);
+  border:10px solid black;
+  
 }
 
 #card-container{
-  margin:10%;
-  border:10px solid black;
+  padding-top: 5%;;
+  position: relative;
+}
+
+.card{
+  border: 1px solid rgb(220,220,220);
+  box-shadow: 5px 5px rgb(220,220,220);
+}
+
+
+
+#tech-stack{
+  margin-top: 5%;
+  height: 50vh;
+  border: 1px solid rgb(220,220,220);
+  box-shadow: 5px 5px rgb(220,220,220);
+}
+
+#text-stack-1{
+  text-align: center;
+  padding: 15vh;
+  border-right: 3px solid rgb(220,220,220);
+}
+
+#text-stack-2{
+  padding: 0%;
+  padding-bottom: 0%;
+  background-color: red;
+}
+
+.img-fluid{
+  max-width: 100%;
+  max-height: auto;
 }
