@@ -20,6 +20,22 @@ html {
   
 }
 
+.card-title{
+  color: #303960;
+  text-align: center;
+}
+
+.card-text{
+  text-align: center;
+}
+
+.card-img-top{
+  padding-top: 5%;
+  height: 200px;
+  width: 200px;
+}
+
+
 #card-container{
   padding-top: 5%;
   position: relative;
