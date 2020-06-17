@@ -14,17 +14,30 @@ html {
 }
 
 #hero{
-  padding-top:20%;
-  padding-left:10%;
-  padding-bottom: 20%;
-  background-image: linear-gradient(to top right, #C04848, #480048);
+
+  background-color: #303960;
   /*border:10px solid black;*/
   
 }
 
 #card-container{
-  padding-top: 5%;;
+  padding-top: 5%;
   position: relative;
+  padding-bottom: 0%;
+}
+
+
+#intro-words{
+  padding-top: 40%;
+  padding-left: 10%;
+  padding-bottom: 0%;
+}
+
+#stats-image{
+  height: 80%;
+  width: 80%;
+  padding-top: 10%;
+  padding-left: 10%; 
 }
 
 .card{
